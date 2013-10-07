@@ -23,11 +23,7 @@ class SQLObject < MassObject
       FROM "#{self.table_name}"
     SQL
 
-    hash_array.each do |hash|
-       object_array << self.new(hash)
-    end
-
-    object_array
+    self.parse_all(hash_array)
   end
 
   def self.find(id)

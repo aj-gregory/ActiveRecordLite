@@ -11,8 +11,6 @@ module Searchable
   	  WHERE #{mapped_keys.join(', ')}
   	SQL
 
-    object_array = []
-  	hash_array.each { |hash| object_array << self.new(hash)}
-    object_array
+    self.parse_all(hash_array)
   end
 end
