@@ -32,17 +32,24 @@ class SQLObject < MassObject
       INSERT INTO [#{self.class.table_name}] (#{self.class.attributes.join(',')})
       VALUES (#{(['?'] * 3).join(',')})
     SQL
-  end
-
-  def update
-    DBConnection.execute(<<-SQL, *values)
-      UPDATE [#{self.table_name}]
-      SET 
-    SQL
     self.id = DBConnection.last_insert_row_id
   end
 
+  def update
+    # DBConnection.execute(<<-SQL, *values)
+    #   UPDATE [#{self.table_name}]
+    #   SET 
+    # SQL
+    # self.id = DBConnection.
+    p "CALLED UPDATE"
+  end
+
   def save
+    if self.id.nil?
+      self.create
+    else
+      self.update
+    end
   end
 
   def attribute_values
@@ -73,5 +80,3 @@ p Cat.find(2)
 
 p Human.all
 p Cat.all
-
-c = Cat.new(:name => "Gizmo", :owner_id => 1)
