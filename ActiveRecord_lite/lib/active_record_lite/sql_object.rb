@@ -13,20 +13,28 @@ class SQLObject < MassObject
   end
 
   def self.all
-    DBConnection.execute(<<-SQL)
+    object_array = []
+
+    hash_array = DBConnection.execute(<<-SQL)
       SElECT *
       FROM "#{self.table_name}"
     SQL
+
+    hash_array.each do |hash|
+       object_array << self.new(hash)
+    end
+
+    object_array
   end
 
   def self.find(id)
-    return self.new((
-      DBConnection.execute(<<-SQL, id)
-        SElECT *
-        FROM "#{self.table_name}"
-        WHERE ? = id 
-      SQL
-      ).flatten)
+    hash_array = DBConnection.execute(<<-SQL, id)
+      SElECT *
+      FROM "#{self.table_name}"
+      WHERE ? = id 
+    SQL
+
+    self.new(hash_array[0])
   end
 
   def create
