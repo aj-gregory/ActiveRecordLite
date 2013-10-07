@@ -46,9 +46,10 @@ class SQLObject < MassObject
   end
 
   def update
-    DBConnection.execute(<<-SQL, *attribute_values)
-      UPDATE [#{self.table_name}]
-      SET #{self.class.attributes.map { |attr_name| "#{attr_name} = ?"}.join(', ')}
+    DBConnection.execute(<<-SQL, *attribute_values[1..-1], attribute_values[0])
+      UPDATE [#{self.class.table_name}]
+      SET #{self.class.attributes[1..-1].map { |attr_name| "#{attr_name} = ?"}.join(', ')}
+      WHERE ? = id
     SQL
   end
 
