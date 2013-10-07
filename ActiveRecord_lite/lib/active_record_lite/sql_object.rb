@@ -20,11 +20,13 @@ class SQLObject < MassObject
   end
 
   def self.find(id)
-    DBConnection.execute(<<-SQL, id)
-      SElECT *
-      FROM "#{self.table_name}"
-      WHERE ? = id 
-    SQL
+    return self.new((
+      DBConnection.execute(<<-SQL, id)
+        SElECT *
+        FROM "#{self.table_name}"
+        WHERE ? = id 
+      SQL
+      ).flatten)
   end
 
   def create
@@ -36,12 +38,10 @@ class SQLObject < MassObject
   end
 
   def update
-    # DBConnection.execute(<<-SQL, *values)
-    #   UPDATE [#{self.table_name}]
-    #   SET 
-    # SQL
-    # self.id = DBConnection.
-    p "CALLED UPDATE"
+    DBConnection.execute(<<-SQL, *attribute_values)
+      UPDATE [#{self.table_name}]
+      SET #{self.class.attributes.map { |attr_name| "#{attr_name} = ?"}.join(', ')}
+    SQL
   end
 
   def save
@@ -73,10 +73,16 @@ class Human < SQLObject
   my_attr_accessible(:id, :fname, :lname, :house_id)
 end
 
-p Human.superclass
 p Human.find(1)
 p Cat.find(1)
 p Cat.find(2)
 
 p Human.all
 p Cat.all
+
+c = Cat.new(:name => "Gizmo", :owner_id => 1)
+c.save
+
+h = Human.find(1)
+# just run an UPDATE; no values changed, so shouldnt hurt the db
+h.save

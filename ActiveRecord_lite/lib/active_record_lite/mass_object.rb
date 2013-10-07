@@ -14,9 +14,9 @@ class MassObject
   end
 
   def initialize(params = {})
-  	params.keys.each do |param|
-  	  if self.class.attributes.include?(param)
-  	  	self.send("#{param}=", params[param])
+  	params[0].keys.each do |param|
+  	  if self.class.attributes.include?(param.to_sym)
+  	  	self.send("#{param}=", params[0][param])
   	  else
   	    raise "mass assignment to unregistered attribute #{param}"
   	 end
