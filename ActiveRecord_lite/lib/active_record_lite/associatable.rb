@@ -44,6 +44,7 @@ class BelongsToAssocParams < AssocParams
     else
       @foreign_key = "#{name}_id"
     end
+    self
   end
 
   def type
@@ -56,8 +57,7 @@ class HasManyAssocParams < AssocParams
 
   def initialize(name, params, self_class)
     @assoc_name = name 
-    @type = type 
-    p params
+    @type = type
     if params[:primary_key]
       @primary_key = params[:primary_key]
     else
@@ -68,6 +68,7 @@ class HasManyAssocParams < AssocParams
     else
       @foreign_key = "#{self_class.snake_case}_id"
     end
+    self
   end
 
   def type
@@ -76,40 +77,45 @@ class HasManyAssocParams < AssocParams
 end
 
 module Associatable
+
+  def self.params
+    @params ||= []
+  end
+
   def assoc_params(type, name, *params)
     if type == 'belong'
-      BelongsToAssocParams.new(name, *params)
+      Associatable.params << BelongsToAssocParams.new(name, *params)
     else
-      HasManyAssocParams.new(name, *params, self.class)
+      Associatable.params << HasManyAssocParams.new(name, *params, self.class)
     end
   end
 
   def belongs_to(name, params = {})
     define_method(name) do
-      assoc = self.class.assoc_params('belong', name, params)
-      param_to_find = assoc.foreign_key
+      self.class.assoc_params('belong', name, params)
+      param_to_find = Associatable.params.last.foreign_key
       hash_array = DBConnection.execute(<<-SQL)
         SELECT *
-        FROM #{assoc.other_table}
-        WHERE #{assoc.other_table}.#{assoc.primary_key} = #{self.send(param_to_find)}
+        FROM #{Associatable.params.last.other_table}
+        WHERE #{Associatable.params.last.other_table}.#{Associatable.params.last.primary_key} = #{self.send(param_to_find)}
         LIMIT 1
       SQL
 
-      assoc.other_class.parse_all(hash_array).first
+      Associatable.params.last.other_class.parse_all(hash_array).first
     end
   end
 
   def has_many(name, params = {})
     define_method(name) do
-      assoc = self.class.assoc_params('has_many', name, params)
-      param_to_find = assoc.primary_key
+      self.class.assoc_params('has_many', name, params)
+      param_to_find = Associatable.params.last.primary_key
       hash_array = DBConnection.execute(<<-SQL)
         SELECT *
-        FROM #{assoc.other_table}
-        WHERE #{assoc.other_table}.#{assoc.foreign_key} = #{self.send(param_to_find)}
+        FROM #{Associatable.params.last.other_table}
+        WHERE #{Associatable.params.last.other_table}.#{Associatable.params.last.foreign_key} = #{self.send(param_to_find)}
       SQL
 
-      assoc.other_class.parse_all(hash_array)
+      Associatable.params.last.other_class.parse_all(hash_array)
     end
   end
 
