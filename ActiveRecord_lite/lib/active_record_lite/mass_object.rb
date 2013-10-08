@@ -12,7 +12,6 @@ class MassObject
 
   def self.parse_all(results)
   	object_array = []
-
   	results.each do |hash|
        object_array << self.new(hash)
     end
