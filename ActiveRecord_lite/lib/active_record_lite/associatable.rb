@@ -123,9 +123,3 @@ module Associatable
   end
 
 end
-
-
-# assoc = BelongsToAssocParams.new('human')
-# p assoc.primary_key
-# p assoc.foreign_key
-# p assoc.other_class_name
