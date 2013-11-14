@@ -2,9 +2,10 @@
 
 ##Features
 
--Querying
--Persistence
--Mass Assignment
--Associations
-  *has_many
-  *belongs_to
+- Querying
+- Persistence
+- Mass Assignment
+- Associations
+  * has_many
+  * belongs_to
+
